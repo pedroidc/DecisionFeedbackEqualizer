@@ -15,7 +15,7 @@ Nbits = 1e4;            % Number of bits for each trial
 Ntr = 1000;             % Length of the training sequence
 Ntrials = NTbits/Nbits; % Number of trials necessary
 Ns = Nbits/log2(M);     % Number os symbols in each trial
-u = 0.01;               % LMS adaptation step
+mu = 0.01;               % LMS adaptation step
 
 %% QPSK Modulation:
 hMod = comm.RectangularQAMModulator( ...
@@ -58,13 +58,13 @@ for iSNR = 1:NSNR
     for iReal = 1:Ntrials
         
         %% Transmitter:
-        xa = randsrc(Nbits, 1, [0 1]);          % Information bit stream
-        xamod = step(hMod, xa);                 % Modulate
+        x = randsrc(Nbits, 1, [0 1]); % Information bit stream
+        xmod = step(hMod, x);         % Modulate
         
         %%  Channel
-        hab = hba;                                % Reciprocal channel
-        ybch = filter(hab, 1, xamod);             % Apply fading
-        ybch = awgn(ybch, SNR(iSNR), 'measured'); % AWGN
+        h = sqrt(0.5*pp).*(randn(L, 1) + 1j*randn(L, 1)); % Fading Channel
+        ych = filter(h, 1, xmod);                         % Apply fading
+        ych = awgn(ych, SNR(iSNR), 'measured');           % AWGN
         
         %% Receiver:
         % DFE:
@@ -76,7 +76,7 @@ for iSNR = 1:NSNR
         yb = 0;             % Feedback filter output for first iteration
         for n = 1:Ns
             % Forward filter:
-            uf = [ybch(n) uf(1:end-1)];    % Input vector
+            uf = [ych(n) uf(1:end-1)];    % Input vector
             yf =  uf*wf;                   % Output sample
             % Decision:
             yi = yf - yb;                           % Decision input sample
@@ -95,7 +95,7 @@ for iSNR = 1:NSNR
         
         %% Performance Evaluation
         % BER in B:
-        [~, bertemp] = biterr(xbdemod, xa);
+        [~, bertemp] = biterr(xbdemod, x);
         berB(iSNR) = berB(iSNR) + bertemp;
         
         % DFE convergence:
