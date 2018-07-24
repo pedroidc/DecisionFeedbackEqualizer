@@ -69,7 +69,9 @@ for iSNR = 1:NSNR
         % DFE:
         % Initializations:
         wf = zeros(Neq, 1); % Forward filter weights
+        wf(ceil(Neq/2)) = 1;
         wb = zeros(Neq, 1); % Feedback filter weights
+        wb(ceil(Neq/2)) = 1;
         yd = zeros(Ns, 1);  % DFE Output
         e = zeros(Ns, 1);   % DFE error
         yb = 0;             % Feedback filter output for first iteration
