@@ -10,7 +10,7 @@ clear variables; %close all;
 
 %% Simulation Parameters:
 M = 4;                  % QPSK modulation order
-NTbits = 1e8;           % Total number bits to be transmitted
+NTbits = 1e6;           % Total number bits to be transmitted
 Nbits = 1e4;            % Number of bits for each trial
 Ntr = 1000;             % Length of the training sequence
 Ntrials = NTbits/Nbits; % Number of trials necessary
@@ -53,7 +53,7 @@ for iSNR = 1:NSNR
     
     berBtrial = 0;
     berEtrial = 0;
-    eqm = zeros(Nbits, 1);
+    eqm = zeros(Ns, 1);
     Ph = 0;
     
     for iReal = 1:Ntrials
@@ -88,12 +88,13 @@ for iSNR = 1:NSNR
             ub = [yd(n) ub(1:end-1)]; % Input vector
             yb = ub*wb;               % Output sample
             % Adaptation:
-            e(n) = yi - ye;
+            e(n) = yi - yb;
             wf = wf + mu*uf'*e(n);
             wb = wb + mu*ub'*e(n);
         end
         
         % Demodulate:
+        hDemod.release();
         xbdemod = step(hDemod, yd);
         
         %% Performance Evaluation
