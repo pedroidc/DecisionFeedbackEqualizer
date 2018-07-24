@@ -83,7 +83,7 @@ for iSNR = 1:NSNR
             yf =  uf*wf;               % Output sample
             % Decision:
             yi = yf - yb;                           % Decision input sample
-            yd(n) = step(hDemod, step(hMod, yi));   % Demodulated output
+            yd(n) = step(hMod, step(hDemod, yi));   % Demodulated output
             % Feedback filter:
             ub = [yd(n) ub(1:end-1)]; % Input vector
             yb = ub*wb;               % Output sample
