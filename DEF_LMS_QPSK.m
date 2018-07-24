@@ -9,13 +9,13 @@
 clear variables; %close all;
 
 %% Simulation Parameters:
-M = 4;          % Ordem da modulação QPSK
-NTbits = 1e8;   % Número total de bits a serem transmitidos
-Nbits = 1e4;    % Número de bits a serem transmitidos por realização
-Ntr = 1000;     % Comprimento da sequência de treinamento em símbolos
-Ntrials = NTbits/Nbits; % Número total de realizações
-Ns = Nbits/log2(M);
-u = 0.01;
+M = 4;                  % QPSK modulation order
+NTbits = 1e8;           % Total number bits to be transmitted
+Nbits = 1e4;            % Number of bits for each trial
+Ntr = 1000;             % Length of the training sequence
+Ntrials = NTbits/Nbits; % Number of trials necessary
+Ns = Nbits/log2(M);     % Number os symbols in each trial
+u = 0.01;               % LMS adaptation step
 
 %% QPSK Modulation:
 hMod = comm.RectangularQAMModulator( ...
