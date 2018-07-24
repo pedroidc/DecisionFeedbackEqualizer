@@ -1,11 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Simulação de um sistema de segurança utilizando precodificação não
-% linear, mais especificamente o precodificador Tomlinson-Harashima. O
-% precodificador, neste caso, tem como objetivo distorcer a informação de
-% forma que apenas o usuário que esteja recebendo através do canal
-% autêntico poderá decodificar a informação.
+% Simulation of a communication system using decision-feedback equalizer
+% with the LMS algorithm in order to mitigate the frequency selective
+% effects of the wireless channel.
 %
-% Autor: Pedro Ivo da Cruz
+% Author: Pedro Ivo da Cruz
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear variables; %close all;
