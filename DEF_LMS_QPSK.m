@@ -38,8 +38,6 @@ pp = pp.'/sum(pp);      % Normalize to make the total power 1;
 hError = comm.ErrorRate('ResetInputPort', true);
 NSNR = length(SNR);
 berB = zeros(NSNR, 1);
-berE = zeros(NSNR, 1);
-ecma = zeros(Ns, 1);
 
 %% Simulation:
 cont = 0;
@@ -131,9 +129,8 @@ berTheory = berfading(EbNo, 'qam', M, 1);
 figure
 semilogy(SNR, berB, 'bo--');
 hold on;
-semilogy(SNR, berE, 'ro--');
 semilogy(SNR, berTheory, 'kx-');
-legend('Alice', 'Eve', 'Theory');
+legend('Simulation', 'Theory');
 xlabel('SNR (dB)');
 ylabel('BER');
 %axis([EbNo(1) EbNo(end) 0.0001 1]);
