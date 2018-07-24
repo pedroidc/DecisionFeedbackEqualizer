@@ -15,7 +15,8 @@ Nbits = 1e4;            % Number of bits for each trial
 Ntr = 1000;             % Length of the training sequence
 Ntrials = NTbits/Nbits; % Number of trials necessary
 Ns = Nbits/log2(M);     % Number os symbols in each trial
-mu = 0.01;               % LMS adaptation step
+mu = 0.01;              % LMS adaptation step
+Neq = 13;               % DFE filters lenght
 
 %% QPSK Modulation:
 hMod = comm.RectangularQAMModulator( ...
@@ -74,20 +75,22 @@ for iSNR = 1:NSNR
         yd = zeros(Ns, 1);  % DFE Output
         e = zeros(Ns, 1);   % DFE error
         yb = 0;             % Feedback filter output for first iteration
+        uf = zeros(1, Neq); % Forward filter input vector
+        ub = zeros(1, Neq); % Feedback filter input vector
         for n = 1:Ns
             % Forward filter:
-            uf = [ych(n) uf(1:end-1)];    % Input vector
-            yf =  uf*wf;                   % Output sample
+            uf = [ych(n) uf(1:end-1)]; % Input vector
+            yf =  uf*wf;               % Output sample
             % Decision:
             yi = yf - yb;                           % Decision input sample
             yd(n) = step(hDemod, step(hMod, yi));   % Demodulated output
             % Feedback filter:
-            ub = [yd(n) ub(1:end-1)];   % Input vector
-            yb = ub*wb;                 % Output sample
+            ub = [yd(n) ub(1:end-1)]; % Input vector
+            yb = ub*wb;               % Output sample
             % Adaptation:
             e(n) = yi - ye;
-            wf = wf(:, n) + mu*uf'*e(n);
-            wb = wb(:, n) + mu*ub'*e(n);
+            wf = wf + mu*uf'*e(n);
+            wb = wb + mu*ub'*e(n);
         end
         
         % Demodulate:
