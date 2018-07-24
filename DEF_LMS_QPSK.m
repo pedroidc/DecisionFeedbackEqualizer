@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Simulation of a communication system using decision-feedback equalizer
-% with the LMS algorithm in order to mitigate the frequency selective
+% (DFE) with the LMS algorithm in order to mitigate the frequency selective
 % effects of the wireless channel.
 %
 % Author: Pedro Ivo da Cruz
@@ -15,7 +15,7 @@ Nbits = 1e4;    % Número de bits a serem transmitidos por realização
 Ntr = 1000;     % Comprimento da sequência de treinamento em símbolos
 Ntrials = NTbits/Nbits; % Número total de realizações
 Ns = Nbits/log2(M);
-% u = 0.0001;
+u = 0.01;
 
 %% QPSK Modulation:
 hMod = comm.RectangularQAMModulator( ...
@@ -52,7 +52,7 @@ for iSNR = 1:NSNR
     
     berBtrial = 0;
     berEtrial = 0;
-    ecmatrial = zeros(Nbits, 1);
+    eqm = zeros(Nbits, 1);
     Ph = 0;
     
     for iReal = 1:Ntrials
@@ -68,26 +68,38 @@ for iSNR = 1:NSNR
         
         %% Receiver:
         % DFE:
-        
+        % Initializations:
+        wf = zeros(Neq, 1); % Forward filter weights
+        wb = zeros(Neq, 1); % Feedback filter weights
+        yd = zeros(Ns, 1);  % DFE Output
+        e = zeros(Ns, 1);   % DFE error
+        yb = 0;             % Feedback filter output for first iteration
+        for n = 1:Ns
+            % Forward filter:
+            uf = [ybch(n) uf(1:end-1)];    % Input vector
+            yf =  uf*wf;                   % Output sample
+            % Decision:
+            yi = yf - yb;                           % Decision input sample
+            yd(n) = step(hDemod, step(hMod, yi));   % Demodulated output
+            % Feedback filter:
+            ub = [yd(n) ub(1:end-1)];   % Input vector
+            yb = ub*wb;                 % Output sample
+            % Adaptation:
+            e(n) = yi - ye;
+            wf = wf(:, n) + mu*uf'*e(n);
+            wb = wb(:, n) + mu*ub'*e(n);
+        end
         
         % Demodulate:
-        xbdemod = step(hDemod, ybd);
-        
-        % CMA Receiver:
-%         [w, ytemp, etemp] = cmaEqualizer(yech, u, 3*L, 0); % Apply CMA Equalizer
-%         yeeq = filter(w(:, end), 1, [yech; zeros(floor(3*L/2)-3, 1)]);
-%         yeeq(1:floor(3*L/2)-3) = [];
-%         yeeq = filter(w(:, end), 1, yech);
-%         xedemod = step(hDemod, yeeq); % Demodula
-        
+        xbdemod = step(hDemod, yd);
         
         %% Performance Evaluation
         % BER in B:
         [~, bertemp] = biterr(xbdemod, xa);
         berB(iSNR) = berB(iSNR) + bertemp;
         
-        % CMA convergence:
-%         ecmatrial = ecmatrial + etemp.^2;
+        % DFE convergence:
+        eqm = eqm + e.^2;
         
         % Simulation progress:
         cont = cont + 1;
@@ -101,7 +113,7 @@ for iSNR = 1:NSNR
 end
 
 berB = berB/Ntrials;
-ecma = ecma/Ntrials;
+eqm = eqm/Ntrials;
 
 close(progbar)
 
@@ -124,7 +136,7 @@ ylabel('BER');
 grid on;
 
 figure
-plot(10*log10(ecma));
+plot(10*log10(eqm));
 
 % scatterplot(yach)
 
